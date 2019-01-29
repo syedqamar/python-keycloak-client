@@ -78,3 +78,17 @@ class KeycloakAdminRolesTestCase(TestCase):
                 'Content-Type': 'application/json'
             }
         )
+
+    def test_delete(self):
+        self.admin.realms.by_name('realm-name').clients.by_id(
+            '#123').roles.by_name('role-name').delete()
+        self.realm.client.get_full_url.assert_called_once_with(
+            '/auth/admin/realms/realm-name/clients/#123/roles/role-name'
+        )
+        self.realm.client.delete.assert_called_once_with(
+            url=self.realm.client.get_full_url.return_value,
+            headers={
+                'Authorization': 'Bearer some-token',
+                'Content-Type': 'application/json'
+            }
+        )

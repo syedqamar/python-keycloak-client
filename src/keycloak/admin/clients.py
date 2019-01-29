@@ -38,3 +38,21 @@ class Client(KeycloakAdminBase):
         from keycloak.admin.roles import Roles
         return Roles(client=self._client, client_id=self._id,
                      realm_name=self._realm_name)
+
+    @property
+    def role_mappings(self):
+        from keycloak.admin.role_mappings import RoleMappings
+        return RoleMappings(client=self._client, client_id=self._id,
+                            realm_name=self._realm_name)
+
+    @property
+    def permissions(self):
+        from keycloak.admin.permissions import Permissions
+        return Permissions(client=self._client, client_id=self._id,
+                           realm_name=self._realm_name)
+
+    @property
+    def policies(self):
+        from keycloak.admin.policies import Policies
+        return Policies(client=self._client, client_id=self._id,
+                        realm_name=self._realm_name)

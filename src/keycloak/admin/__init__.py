@@ -58,9 +58,12 @@ class KeycloakAdmin(object):
         from keycloak.admin.realm import Realms
         return Realms(client=self)
 
-    def post(self, url, data, headers=None, **kwargs):
+    def post(self, url, data, headers=None,
+             include_response_headers=False, **kwargs):
         return self._realm.client.post(
-            url=url, data=data, headers=self._add_auth_header(headers=headers)
+            url=url, data=data, headers=self._add_auth_header(
+                headers=headers),
+            include_response_headers=include_response_headers
         )
 
     def put(self, url, data, headers=None, **kwargs):
@@ -71,6 +74,11 @@ class KeycloakAdmin(object):
     def get(self, url, headers=None, **kwargs):
         return self._realm.client.get(
             url=url, headers=self._add_auth_header(headers=headers)
+        )
+
+    def delete(self, url, headers=None, **kwargs):
+        return self._realm.client.delete(
+            url=url, headers=self._add_auth_header(headers=headers), **kwargs
         )
 
     #

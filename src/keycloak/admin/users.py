@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from keycloak.admin import KeycloakAdminBase
 
-__all__ = ('Users',)
+__all__ = ('Users', 'User')
 
 
 class Users(KeycloakAdminBase):
@@ -51,5 +51,87 @@ class Users(KeycloakAdminBase):
             url=self._client.get_full_url(
                 self.get_path('collection', realm=self._realm_name)
             ),
+            data=json.dumps(payload),
+            include_response_headers=True
+        )
+
+    def all(self):
+        return self._client.get(
+            url=self._client.get_full_url(
+                self.get_path('collection', realm=self._realm_name)
+            )
+        )
+
+    def by_id(self, id):
+        return User(client=self._client, realm_name=self._realm_name, id=id)
+
+
+class User(KeycloakAdminBase):
+    _id = None
+    _realm_name = None
+
+    _paths = {
+        'single': '/auth/admin/realms/{realm}/users/{id}',
+        'totp': '/auth/realms/{realm}/account/totp?'
+                'referrer=security-admin-console',
+        'group_membership': '/auth/admin/realms/{realm}/users/{id}/groups',
+        'membership_user_group': '/auth/admin/realms/{realm}/users/{'
+                                 'id}/groups/{group_id}'
+    }
+
+    def __init__(self, realm_name, id, *args, **kwargs):
+        self._id = id
+        self._realm_name = realm_name
+        super(User, self).__init__(*args, **kwargs)
+
+    def update(self, name, **kwargs):
+        payload = OrderedDict(name=name)
+
+        for key in kwargs:
+            payload[key] = kwargs[key]
+
+        return self._client.put(
+            url=self._client.get_full_url(
+                self.get_path('single',
+                              realm=self._realm_name, id=self._id)
+            ),
             data=json.dumps(payload)
+        )
+
+    def delete(self):
+        return self._client.delete(
+            url=self._client.get_full_url(
+                self.get_path('single', id=self._id, realm=self._realm_name)
+            )
+        )
+
+    def get_group_memberships(self, **kwargs):
+        return self._client.get(
+            url=self._client.get_full_url(
+                self.get_path('group_membership', id=self._id,
+                              realm=self._realm_name), kwargs)
+        )
+
+    def join_group(self, group_id, **kwargs):
+        return self._client.put(
+            url=self._client.get_full_url(
+                self.get_path('membership_user_group', id=self._id,
+                              realm=self._realm_name,
+                              group_id=group_id), kwargs),
+            data={}
+        )
+
+    def leave_group(self, group_id, **kwargs):
+        return self._client.delete(
+            url=self._client.get_full_url(
+                self.get_path('membership_user_group', id=self._id,
+                              realm=self._realm_name,
+                              group_id=group_id), kwargs)
+        )
+
+    def configure_totp(self):
+        return self._client.get(
+            url=self._client.get_full_url(
+                self.get_path('totp', realm=self._realm_name)
+            )
         )

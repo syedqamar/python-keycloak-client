@@ -6,8 +6,12 @@ from keycloak.exceptions import KeycloakClientError
 
 try:
     from urllib.parse import urljoin  # noqa: F401
+    from urllib.parse import urlencode
+    import urllib.parse as urlparse
 except ImportError:
     from urlparse import urljoin  # noqa: F401
+    import urlparse
+    from urllib import urlencode
 
 import requests
 
@@ -55,13 +59,27 @@ class KeycloakClient(object):
             self._session.headers.update(self._headers)
         return self._session
 
-    def get_full_url(self, path, server_url=None):
-        return urljoin(server_url or self._server_url, path)
+    def get_full_url(self, path, server_url=None, **kwargs):
+        """
+        This is a generic method for appending any k/v as query-params to URL
 
-    def post(self, url, data, headers=None, **kwargs):
+        :param path:
+        :param server_url:
+        :param kwargs:
+        :return:
+        """
+        full_url = urljoin(server_url or self._server_url, path)
+        url_parts = list(urlparse.urlparse(full_url))
+        query = dict(urlparse.parse_qsl(url_parts[4]))
+        query.update(kwargs)
+        url_parts[4] = urlencode(query)
+        return urlparse.urlunparse(url_parts)
+
+    def post(self, url, data, headers=None,
+             include_response_headers=False, **kwargs):
         return self._handle_response(
             self.session.post(url, headers=headers or {}, params=kwargs,
-                              data=data)
+                              data=data), include_response_headers
         )
 
     def put(self, url, data, headers=None, **kwargs):
@@ -78,7 +96,7 @@ class KeycloakClient(object):
     def delete(self, url, headers, **kwargs):
         return self.session.delete(url, headers=headers, **kwargs)
 
-    def _handle_response(self, response):
+    def _handle_response(self, response, include_response_headers=False):
         with response:
             try:
                 response.raise_for_status()
@@ -89,9 +107,13 @@ class KeycloakClient(object):
                 raise KeycloakClientError(original_exc=err)
 
             try:
-                return response.json()
+                resp = response.json()
             except ValueError:
-                return response.content
+                resp = response.content
+
+            if include_response_headers:
+                return resp, response.headers
+            return resp
 
     def close(self):
         if self._session is not None:

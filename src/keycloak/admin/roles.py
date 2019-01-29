@@ -39,6 +39,14 @@ class Roles(KeycloakAdminBase):
         return Role(realm_name=self._realm_name, client_id=self._client_id,
                     role_name=role_name, client=self._client)
 
+    def all(self):
+        return self._client.get(
+            url=self._client.get_full_url(
+                self.get_path('collection', realm=self._realm_name,
+                              id=self._client_id)
+            )
+        )
+
     def create(self, name, **kwargs):
         """
         Create new role
@@ -67,7 +75,8 @@ class Roles(KeycloakAdminBase):
                               realm=self._realm_name,
                               id=self._client_id)
             ),
-            data=json.dumps(payload)
+            data=json.dumps(payload),
+            include_response_headers=True
         )
 
 
@@ -82,6 +91,22 @@ class Role(KeycloakAdminBase):
         self._role_name = role_name
 
         super(Role, self).__init__(*args, **kwargs)
+
+    def delete(self):
+        return self._client.delete(
+            url=self._client.get_full_url(
+                self.get_path('single', realm=self._realm_name,
+                              id=self._client_id, role_name=self._role_name)
+            )
+        )
+
+    def get(self):
+        return self._client.get(
+            url=self._client.get_full_url(
+                self.get_path('single', realm=self._realm_name,
+                              id=self._client_id, role_name=self._role_name)
+            )
+        )
 
     def update(self, name, **kwargs):
         """
