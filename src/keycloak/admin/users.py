@@ -84,8 +84,8 @@ class User(KeycloakAdminBase):
         self._realm_name = realm_name
         super(User, self).__init__(*args, **kwargs)
 
-    def update(self, name, **kwargs):
-        payload = OrderedDict(name=name)
+    def update(self, **kwargs):
+        payload = OrderedDict()
 
         for key in kwargs:
             payload[key] = kwargs[key]

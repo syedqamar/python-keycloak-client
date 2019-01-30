@@ -8,7 +8,8 @@ GROUP_KWARGS = [
     'realmRoles',
     'clientRoles',
     'subGroups',
-    'access'
+    'access',
+    'name'
 ]
 
 __all__ = ('Groups', 'Group')
@@ -95,8 +96,8 @@ class Group(KeycloakAdminBase):
             include_response_headers=True
         )
 
-    def update(self, name, **kwargs):
-        payload = OrderedDict(name=name)
+    def update(self, **kwargs):
+        payload = OrderedDict()
 
         for key in GROUP_KWARGS:
             if key in kwargs:

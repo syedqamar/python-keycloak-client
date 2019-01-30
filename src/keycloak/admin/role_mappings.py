@@ -100,13 +100,11 @@ class UserRoleMappings(KeycloakAdminBase):
         )
 
     def delete(self, roles):
-        payload = OrderedDict(roles=roles)
-
         return self._client.delete(
             url=self._client.get_full_url(
                 self.get_path('user_mappings_client',
                               realm=self._realm_name, id=self._client_id,
                               user_id=self._user_id)
             ),
-            data=json.dumps(payload)
+            data=json.dumps(roles)
         )
