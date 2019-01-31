@@ -1,5 +1,4 @@
 import json
-from collections import OrderedDict
 
 from keycloak.admin import KeycloakAdminBase
 
@@ -71,7 +70,9 @@ class GroupRoleMappings(KeycloakAdminBase):
 class UserRoleMappings(KeycloakAdminBase):
     _paths = {
         'user_mappings_client': '/auth/admin/realms/{realm}/users/{user_id}'
-                                '/role-mappings/clients/{id}'
+                                '/role-mappings/clients/{id}',
+        'composite': '/auth/admin/realms/{realm}/users/{user_id}'
+                     '/role-mappings/clients/{id}/composite'
     }
 
     def __init__(self, realm_name, client_id, user_id, *args, **kwargs):
@@ -85,6 +86,14 @@ class UserRoleMappings(KeycloakAdminBase):
         return self._client.get(
             url=self._client.get_full_url(
                 self.get_path('user_mappings_client', realm=self._realm_name,
+                              id=self._client_id, user_id=self._user_id)
+            )
+        )
+
+    def details_composite(self):
+        return self._client.get(
+            url=self._client.get_full_url(
+                self.get_path('composite', realm=self._realm_name,
                               id=self._client_id, user_id=self._user_id)
             )
         )

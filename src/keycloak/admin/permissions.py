@@ -11,7 +11,8 @@ POLICY_TYPES = {
 class Permissions(KeycloakAdminBase):
     _paths = {
         'collection': '/auth/admin/realms/{realm}/clients/{'
-                      'client_id}/authz/resource-server/permission'
+                      'client_id}/authz/resource-server/permission?first=0'
+                      '&max=150'
     }
 
     _realm_name = None
