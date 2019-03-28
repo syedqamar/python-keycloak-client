@@ -47,6 +47,9 @@ class Users(KeycloakAdminBase):
         if 'enabled' in kwargs:
             payload['enabled'] = kwargs['enabled']
 
+        if 'requiredActions' in kwargs:
+            payload['requiredActions'] = kwargs['requiredActions']
+
         return self._client.post(
             url=self._client.get_full_url(
                 self.get_path('collection', realm=self._realm_name)
@@ -76,7 +79,8 @@ class User(KeycloakAdminBase):
                 'referrer=security-admin-console',
         'group_membership': '/auth/admin/realms/{realm}/users/{id}/groups',
         'membership_user_group': '/auth/admin/realms/{realm}/users/{'
-                                 'id}/groups/{group_id}'
+                                 'id}/groups/{group_id}',
+        'disable_credentials': '/auth/admin/realms/{realm}/users/{id}/disable-credential-types'
     }
 
     def __init__(self, realm_name, id, *args, **kwargs):
@@ -134,4 +138,14 @@ class User(KeycloakAdminBase):
             url=self._client.get_full_url(
                 self.get_path('totp', realm=self._realm_name)
             )
+        )
+
+    def disable_credentials(self, credentialtypes):
+
+        return self._client.put(
+            url=self._client.get_full_url(
+                self.get_path('disable_credentials',
+                              realm=self._realm_name, id=self._id)
+            ),
+            data=json.dumps(credentialtypes)
         )
