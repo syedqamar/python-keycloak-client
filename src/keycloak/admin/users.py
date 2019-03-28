@@ -80,7 +80,8 @@ class User(KeycloakAdminBase):
         'group_membership': '/auth/admin/realms/{realm}/users/{id}/groups',
         'membership_user_group': '/auth/admin/realms/{realm}/users/{'
                                  'id}/groups/{group_id}',
-        'disable_credentials': '/auth/admin/realms/{realm}/users/{id}/disable-credential-types'
+        'disable_credentials': '/auth/admin/realms/{realm}/users/{id}/disable-credential-types',
+        'logout_single_user': '/auth/admin/realms/{realm}/users/{id}/logout'
     }
 
     def __init__(self, realm_name, id, *args, **kwargs):
@@ -148,4 +149,13 @@ class User(KeycloakAdminBase):
                               realm=self._realm_name, id=self._id)
             ),
             data=json.dumps(credentialtypes)
+        )
+
+    def logout_single_user(self):
+        return self._client.post(
+            url=self._client.get_full_url(
+                self.get_path('logout_single_user', realm=self._realm_name, id=self._id)
+            ),
+            data={},
+            include_response_headers=True
         )
